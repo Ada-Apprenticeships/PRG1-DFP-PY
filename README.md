@@ -42,7 +42,7 @@ parse_file('./missing_file.csv', './simplified_catalogue.csv', 30)  # Returns -1
 
 ## Additional Considerations:
 
-* Use no additional libraries or modules other than Python's standard library.
+* Use no additional libraries other than what has been provided.
 * Your function should ignore (do not export) any header information (the first row).
 * The problem can be decomposed into smaller single-responsibility functions if you wish.
 * Your final version should demonstrate evidence of being refactored; please note, refactoring is not bug-fixing - essentially it is reducing complexity and simplifying your codebase such that it is as efficient, readable, structured and as manageable as possible.
