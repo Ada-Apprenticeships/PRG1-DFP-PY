@@ -30,6 +30,12 @@ def test_01_basic_operation():
 def test_02_export_file_size():
     test_input = "./datafile_5.csv"
     test_output = "./outputfile_test.csv"
+    
+    # Constants determined from a correctly truncated output of datafile_5.csv
+    # Min size (~200 bytes) ensures all 5 records are present.
+    MIN_EXPECTED_SIZE = 200 
+    # Max size (~270 bytes) ensures the description has been truncated.
+    MAX_EXPECTED_SIZE = 270 
 
     # Ensure test file exists
     assert os.path.exists(test_input), "Test input file should exist"
@@ -42,22 +48,30 @@ def test_02_export_file_size():
     parse_file(test_input, test_output, 30)
     
     # Check if the output file size is reasonable
-    original_size = os.path.getsize(test_input)
     export_size = os.path.getsize(test_output)
     
-    assert export_size > 0, "Output file should not be empty"
-    assert export_size < original_size, "Output file should be smaller than the original file"
+    # A) Check: Output should not be empty and must contain all records (lower bound).
+    assert export_size >= MIN_EXPECTED_SIZE, (
+        f"Output file size ({export_size} bytes) is too small. "
+        f"Expected at least {MIN_EXPECTED_SIZE} bytes. Check if all records were exported."
+    )
+    
+    # B) Check: Output size must be small enough (tighter upper bound) to enforce truncation.
+    assert export_size <= MAX_EXPECTED_SIZE, (
+        f"Output file size ({export_size} bytes) is too large. "
+        f"Expected at most {MAX_EXPECTED_SIZE} bytes. Check for correct description truncation or if the header was included."
+    )
 
-# Test 3: Check behaviour when the source file doesn't exist
+# Test 3: Check behaviour when the source file doesn't exist 
 def test_03_source_file_exists():
     test_input = "./DOESNOTEXIST.csv"
     test_output = "./outputfile_test.csv"
-    expected_result = -1
 
-    result = parse_file(test_input, test_output, 30)
-    assert result == expected_result, "Function should return -1 when source file doesn't exist"
+    # Assert that calling the function with a missing file raises a FileNotFoundError
+    with pytest.raises(FileNotFoundError):
+        parse_file(test_input, test_output, 30)
 
-    # Check that output file wasn't created
+    # Check that output file wasn't created (important to ensure no side effects before error)
     assert not os.path.exists(test_output), "Output file should not be created if source doesn't exist"
 
 # Test 4: Verify the correct length of descriptions
