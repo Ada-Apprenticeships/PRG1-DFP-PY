@@ -11,7 +11,7 @@ You are developing an application for a travel agency that wants to display a co
    * `delimiter`: The delimiter used in the CSV file (default: ",").
 
 2. The function should perform the following actions:
-   * Check if the input file exists. If not, return -1.
+   * Check if the input file exists. If not, raise a `FileNotFoundError`.
    * Check if an output file already exists. If it does, delete it.
    * Read the CSV file at `input_file_path` using the specified `delimiter`.
    * For each holiday package, extract the `holiday_id`, `destination`, `description` and `price`.
@@ -27,7 +27,7 @@ You are developing an application for a travel agency that wants to display a co
 parse_file('./datafile_5.csv', './simplified_5.csv', 30)  # Returns 5
 parse_file('./datafile_EU.csv', './simplified_EU.csv', 30)  # Returns 100
 parse_file('./datafile_UK.csv', './simplified_UK.csv', 25, ';')  # Returns 50
-parse_file('./missing_file.csv', './simplified_catalogue.csv', 30)  # Returns -1
+parse_file('./missing_file.csv', './simplified_catalogue.csv', 30) # Raises FileNotFoundError
 ```
 
 **Exemplar Output File format for datafile_5.csv**
