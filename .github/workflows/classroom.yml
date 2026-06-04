@@ -34,6 +34,7 @@ jobs:
           timeout: 10
           max-score: 8
           setup-command: 'pip install pytest'
+          run-command: 'pytest dfp_test.py --tb=short -p no:cacheprovider'
 
       # Aggregates the grader result and writes the check-run annotation
       - name: Autograding Reporter
