@@ -64,7 +64,7 @@ def test_02_export_file_size():
 
 # Test 3: Check behaviour when the source file doesn't exist 
 def test_03_source_file_exists():
-    test_input = "./DOESNOTEXIST.csv"
+    test_input = os.path.abspath("./DOESNOTEXIST.csv")
     test_output = "./outputfile_test.csv"
 
     # Assert that calling the function with a missing file raises a FileNotFoundError
