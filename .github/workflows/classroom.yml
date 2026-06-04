@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# GitHub Actions autograder for the prg1-dfp-py assignment.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Autograding Tests
+
+on:
+  push:
+  workflow_dispatch:
+  repository_dispatch:
+
+permissions:
+  checks: write
+  actions: read
+  contents: read
+
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the student's code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Runs pytest (it picks up dfp_test.py automatically) and awards a score
+      # proportional to the number of tests that pass, out of max-score.
+      - name: Run tests
+        id: dfp
+        uses: classroom-resources/autograding-python-grader@v1
+        with:
+          timeout: 10
+          max-score: 8
+          setup-command: 'pip install pytest'
+
+      # Aggregates the grader result and writes the check-run annotation
+      - name: Autograding Reporter
+        uses: classroom-resources/autograding-grading-reporter@v1
+        env:
+          DFP_RESULTS: "${{ steps.dfp.outputs.result }}"
+        with:
+          runners: dfp
