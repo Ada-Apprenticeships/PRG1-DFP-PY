@@ -5,11 +5,21 @@ import os, pytest
 # pytest -v dfp_test.py  (runs all the tests)
 # pytest -v dfp_test.py::test_02_basic_operation (runs a specific test)
 
+# Resolve all paths relative to this test file's directory, producing
+# absolute paths so the autograding-python-grader crash reporter never
+# encounters a mix of relative and absolute paths (which triggers a
+# ValueError in os.path.commonpath and aborts the entire test run).
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+def _p(filename):
+    """Return an absolute path for a file in the same directory as this test module."""
+    return os.path.join(HERE, filename)
+
 
 # Test 1: Test parsing a simple CSV file
 def test_01_basic_operation():
-    test_input = "./datafile_5.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_5.csv")
+    test_output = _p("outputfile_test.csv")
     expected_records = 5
 
     # Ensure test file exists
@@ -28,8 +38,8 @@ def test_01_basic_operation():
 
 # Test 2: Test if output file size is reasonable
 def test_02_export_file_size():
-    test_input = "./datafile_5.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_5.csv")
+    test_output = _p("outputfile_test.csv")
     
     # Constants determined from a correctly truncated output of datafile_5.csv
     # Min size (~200 bytes) ensures all 5 records are present.
@@ -64,8 +74,8 @@ def test_02_export_file_size():
 
 # Test 3: Check behaviour when the source file doesn't exist 
 def test_03_source_file_exists():
-    test_input = os.path.abspath("./DOESNOTEXIST.csv")
-    test_output = "./outputfile_test.csv"
+    test_input = _p("DOESNOTEXIST.csv")
+    test_output = _p("outputfile_test.csv")
 
     # Assert that calling the function with a missing file raises a FileNotFoundError
     with pytest.raises(FileNotFoundError):
@@ -76,8 +86,8 @@ def test_03_source_file_exists():
 
 # Test 4: Verify the correct length of descriptions
 def test_04_description_length():
-    test_input = "./datafile_5.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_5.csv")
+    test_output = _p("outputfile_test.csv")
     max_description_length = 30
 
     # Ensure test file exists
@@ -100,8 +110,8 @@ def test_04_description_length():
 
 # Test 5: Check some processed records at the end of the file
 def test_05_check_end_records():
-    test_input = "./datafile_EU.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_EU.csv")
+    test_output = _p("outputfile_test.csv")
     max_description_length = 30
 
     # Ensure test file exists
@@ -127,8 +137,8 @@ def test_05_check_end_records():
 
 # Test 6: Verify processing with a different delimiter (semicolon)
 def test_06_different_delimiter():
-    test_input = "./datafile_UK.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_UK.csv")
+    test_output = _p("outputfile_test.csv")
     max_description_length = 30
     delimiter = ";"
 
@@ -152,8 +162,8 @@ def test_06_different_delimiter():
 
 # Test 7: Verify that whitespace is correctly removed (stripped) from datafile_UK.csv
 def test_07_whitespace_removal():
-    test_input = "./datafile_UK.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_UK.csv")
+    test_output = _p("outputfile_test.csv")
     max_description_length = 30
     delimiter = ";"
 
@@ -178,8 +188,8 @@ def test_07_whitespace_removal():
 
 # Test 8: Ensure truncation doesn't happen if max_description_length is larger than description length
 def test_08_no_truncation():
-    test_input = "./datafile_EU.csv"
-    test_output = "./outputfile_test.csv"
+    test_input = _p("datafile_EU.csv")
+    test_output = _p("outputfile_test.csv")
     max_description_length = 100  # Larger than any description in the file
 
     # Ensure test file exists
@@ -199,13 +209,17 @@ def test_08_no_truncation():
     for line in lines:
         columns = line.strip().split(",")
         description = columns[3]
-        original_description = next(row.split(",")[2] for row in open(test_input, "r", encoding="utf-8").readlines() if row.startswith(columns[0]))
+        original_description = next(
+            row.split(",")[2]
+            for row in open(test_input, "r", encoding="utf-8").readlines()
+            if row.startswith(columns[0])
+        )
         assert description == original_description, "Description should not be truncated if max_description_length is larger than description length"
 
 @pytest.fixture(autouse=True)
 def cleanup_files():
     """Cleanup files after each test."""
     yield
-    for file in ["./outputfile_test.csv"]:
-        if os.path.exists(file):
-            os.remove(file)
+    output = _p("outputfile_test.csv")
+    if os.path.exists(output):
+        os.remove(output)
